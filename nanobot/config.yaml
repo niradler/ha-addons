@@ -1,6 +1,9 @@
 name: Nanobot
 version: "0.1.0"
 slug: nanobot
+# Prebuilt image pulled from GHCR (built locally per arch, tag = version).
+# Remove this line to build on-device from the Dockerfile instead.
+image: ghcr.io/niradler/ha-addons-nanobot-{arch}
 description: >-
   Secured, fully-configurable personal AI agent (nanobot) with a WebUI behind
   HA Ingress, Home-Assistant control via MCP, an OpenAI-compatible API, and chat
