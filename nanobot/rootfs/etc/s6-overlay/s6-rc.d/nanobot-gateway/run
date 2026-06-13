@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bashio
+# Longrun: nanobot gateway = WebUI (:8765, proxied by Ingress) + chat channels
+# + MQTT + heartbeat. Health endpoint on :18790.
+declare -a ARGS=(--config /config/nanobot/settings/config.json --workspace /config/nanobot/workspace)
+
+case "$(bashio::config 'log_level')" in
+  trace|debug) ARGS+=(--verbose) ;;
+esac
+
+bashio::log.info "Starting nanobot gateway (WebUI :8765, health :18790)"
+cd /config/nanobot || bashio::exit.nok "Cannot enter /config/nanobot"
+exec nanobot gateway "${ARGS[@]}"

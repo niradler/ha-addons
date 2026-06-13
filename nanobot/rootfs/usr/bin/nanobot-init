@@ -1,0 +1,47 @@
+#!/usr/bin/with-contenv bashio
+set -e
+
+NANOBOT_HOME=/config/nanobot
+SETTINGS="${NANOBOT_HOME}/settings"
+WORKSPACE="${NANOBOT_HOME}/workspace"
+CONFIG="${SETTINGS}/config.json"
+TOKEN_SECRET=/data/token_issue_secret
+ENV_DIR=/run/s6/container_environment
+
+bashio::log.info "Initializing nanobot add-on..."
+mkdir -p "${SETTINGS}" "${WORKSPACE}" /data "${ENV_DIR}"
+
+write_env() {
+  local name="$1" value="$2"
+  [ -n "${value}" ] || return 0
+  printf '%s' "${value}" > "${ENV_DIR}/${name}"
+}
+
+write_env HA_TOKEN "$(bashio::config 'ha_token')"
+write_env HA_URL "$(bashio::config 'ha_url')"
+write_env LLM_API_KEY "$(bashio::config 'llm_api_key')"
+write_env API_TOKEN "$(bashio::config 'api_token')"
+
+if bashio::config.has_value 'secrets'; then
+  while read -r entry; do
+    [ -n "${entry}" ] || continue
+    name="${entry%%=*}"
+    value="${entry#*=}"
+    if [ "${name}" != "${entry}" ] && [ -n "${name}" ]; then
+      write_env "${name}" "${value}"
+    else
+      bashio::log.warning "Ignoring malformed 'secrets' entry (expected NAME=value)"
+    fi
+  done < <(bashio::config 'secrets' | jq -r '.[]?' 2>/dev/null)
+fi
+
+export NANOBOT_OPTIONS=/data/options.json
+export NANOBOT_CONFIG="${CONFIG}"
+export NANOBOT_TOKEN_SECRET="${TOKEN_SECRET}"
+
+if ! python3 /usr/bin/generate-config.py; then
+  bashio::exit.nok "generate-config failed — refusing to start (see error above)"
+fi
+
+bashio::log.info "nanobot config: ${CONFIG} (managed by the nanobot WebUI)"
+bashio::log.info "nanobot init complete."

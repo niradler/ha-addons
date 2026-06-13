@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bashio
+# Longrun (conditional): nanobot serve = OpenAI-compatible API. Host/port come
+# from the runtime config (api.host/api.port set by the overlay). When disabled,
+# the service idles harmlessly so s6 keeps the bundle healthy.
+if ! bashio::config.true 'api_enabled'; then
+  bashio::log.info "OpenAI API disabled (api_enabled=false); idling."
+  exec sleep infinity
+fi
+
+bashio::log.info "Starting nanobot OpenAI-compatible API"
+cd /config/nanobot || bashio::exit.nok "Cannot enter /config/nanobot"
+exec nanobot serve --config /config/nanobot/settings/config.json --workspace /config/nanobot/workspace

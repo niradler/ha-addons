@@ -1,0 +1,70 @@
+name: Nanobot
+version: "0.1.0"
+slug: nanobot
+description: >-
+  Secured, fully-configurable personal AI agent (nanobot) with a WebUI behind
+  HA Ingress, Home-Assistant control via MCP, an OpenAI-compatible API, and chat
+  channels.
+url: https://github.com/niradler/ha-addons/tree/main/nanobot
+# s6-overlay (from the HA base image) is PID1; we do not let the supervisor
+# install its own init.
+init: false
+arch:
+  - aarch64
+  - amd64
+startup: services
+boot: manual
+# WebUI is the nanobot websocket channel; HA Ingress proxies this port.
+ingress: true
+ingress_port: 8765
+panel_icon: mdi:robot-happy
+panel_title: Nanobot
+# Optional: publish the OpenAI-compatible API on a host port. Not mapped by
+# default; mapping it REQUIRES api_token (enforced fail-safe in init).
+ports:
+  "8900/tcp": null
+ports_description:
+  "8900/tcp": OpenAI-compatible API (requires api_token; see docs)
+# Persistent, user-editable nanobot HOME (config.json + workspace) lives under
+# the add-on's own config dir, mounted at /config and backed up with the add-on.
+map:
+  - addon_config:rw
+# Security: NO ambient HA access. We intentionally do NOT grant homeassistant_api
+# or hassio_api, so the add-on's supervisor token cannot touch HA. HA control
+# works only with a user-supplied long-lived token (ha_token), used read-only by
+# default. No privileged, no SYS_ADMIN.
+options:
+  log_level: info
+  llm_provider: openai
+  llm_model: gpt-4.1
+  llm_api_key: ""
+  ha_token: ""
+  ha_url: ""
+  ha_mcp_mode: "off"
+  ha_read_only: true
+  api_enabled: false
+  api_publish_port: false
+  api_port: 8900
+  api_token: ""
+  exec_enabled: false
+  restrict_to_workspace: true
+  webui_auth: false
+  secrets: []
+schema:
+  log_level: list(trace|debug|info|notice|warning|error|fatal)
+  llm_provider: str
+  llm_model: str?
+  llm_api_key: password?
+  ha_token: password?
+  ha_url: str?
+  ha_mcp_mode: list(off|builtin|ha-mcp|both)
+  ha_read_only: bool
+  api_enabled: bool
+  api_publish_port: bool
+  api_port: int(1024,65535)
+  api_token: password?
+  exec_enabled: bool
+  restrict_to_workspace: bool
+  webui_auth: bool
+  secrets:
+    - password
