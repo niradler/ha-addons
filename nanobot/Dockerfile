@@ -55,4 +55,7 @@ RUN chmod +x /usr/bin/nanobot-init /usr/bin/generate-config.py \
 # Gateway health endpoint and WebUI/WebSocket port (proxied by Ingress).
 EXPOSE 18790 8765
 
+# Link the GHCR package to its add-on repository.
+LABEL org.opencontainers.image.source="https://github.com/niradler/ha-addons"
+
 # s6-overlay (from the base image) is the entrypoint; no CMD needed.

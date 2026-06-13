@@ -10,4 +10,4 @@ args:
   # ha-branch change; track the moving `ha` branch only for local dev.
   NANOBOT_REF: 161ca572
 labels:
-  org.opencontainers.image.source: https://github.com/niradler/nanobot
+  org.opencontainers.image.source: https://github.com/niradler/ha-addons
