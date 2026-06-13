@@ -204,64 +204,43 @@ Pinning `NANOBOT_REF` to a commit keeps rebuilds reproducible. The Dockerfile's
 default (`ARG NANOBOT_REF=ha`) tracks the moving `ha` branch for quick local dev
 only; `build.yaml` always pins an explicit commit for real builds.
 
-## Formalizing: publish a prebuilt image
+## Prebuilt images (fast install, no on-device build)
 
-This is the "we're done with dev" step — **not yet active**. It stops on-device
-compilation so fresh instances install in seconds.
-
-1. **Add an `image:` key to `config.yaml`**, e.g.:
-
-   ```yaml
-   image: ghcr.io/niradler/ha-addons-nanobot-{arch}
-   ```
-
-   When `image:` is present, the Supervisor **pulls** the image tagged with the
-   add-on `version` instead of building locally.
-2. **CI builds + pushes to GHCR** on a version tag using the official
-   `home-assistant/builder` action (matrix over `aarch64`/`amd64`). Make the
-   GHCR package **public** so Pis pull without auth.
-3. **Pin `NANOBOT_REF`** to a release commit/tag per image build (reproducible).
-
-Fresh-instance install then becomes: add the repo URL → install (fast pull, no
-compile) → set `llm_api_key` → start.
-
-### Sketch: `.github/workflows/build.yml`
+`nanobot/config.yaml` carries an `image:` key:
 
 ```yaml
-name: Build add-on images
-on:
-  push:
-    tags: ["*"]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [aarch64, amd64]
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push (${{ matrix.arch }})
-        uses: home-assistant/builder@master
-        with:
-          args: >-
-            --${{ matrix.arch }}
-            --target nanobot
-            --image "ha-addons-nanobot-{arch}"
-            --docker-hub ghcr.io/niradler
-            --addon
+image: ghcr.io/niradler/ha-addons-nanobot-{arch}
 ```
+
+When `image:` is set, the Supervisor **pulls** `…-<arch>:<version>` instead of
+building on the device, so a fresh install takes seconds. The published images
+are built locally (no CI) and pushed to GHCR.
+
+### Releasing a new version
+
+```bash
+# 1. (if nanobot changed) push the fork `ha` branch and pin the commit
+#    in nanobot/build.yaml:  NANOBOT_REF: <commit>
+# 2. bump `version` in nanobot/config.yaml
+# 3. build + push each arch (run from the repo root)
+gh auth token | docker login ghcr.io -u niradler --password-stdin
+
+for arch in amd64 aarch64; do
+  docker buildx build --platform "linux/${arch/aarch64/arm64}" \
+    --build-arg "BUILD_FROM=ghcr.io/home-assistant/${arch}-base-debian:bookworm" \
+    --build-arg "NANOBOT_REF=$(grep -oP 'NANOBOT_REF: \K\S+' nanobot/build.yaml)" \
+    -t "ghcr.io/niradler/ha-addons-nanobot-${arch}:$(grep -oP 'version: "\K[^"]+' nanobot/config.yaml)" \
+    --push nanobot/
+done
+```
+
+> aarch64 builds under QEMU on an amd64 host (slow but works). The package
+> visibility must be **Public** (set once per package in the GitHub UI:
+> *user → Packages → ha-addons-nanobot-`<arch>` → Package settings → Change
+> visibility*) so HA can pull without credentials.
+
+Fresh-instance install: add `https://github.com/niradler/ha-addons` as a
+repository → install **Nanobot** (pulls the image) → set `llm_api_key` → start.
 
 ## Repository layout
 
