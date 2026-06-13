@@ -235,10 +235,14 @@ for arch in amd64 aarch64; do
 done
 ```
 
-> aarch64 builds under QEMU on an amd64 host (slow but works). The package
-> visibility must be **Public** (set once per package in the GitHub UI:
-> *user → Packages → ha-addons-nanobot-`<arch>` → Package settings → Change
-> visibility*) so HA can pull without credentials.
+> aarch64 builds under QEMU on an amd64 host (slow but works).
+>
+> **Visibility:** GHCR has no API/push-time flag for user-package visibility — a
+> new package's **first** push lands private. Flip it to **Public** once in the
+> GitHub UI (*user → Packages → ha-addons-nanobot-`<arch>` → Package settings →
+> Change visibility*); visibility then **persists across all future pushes** and
+> version bumps. So this is one-time per package, not per release. The
+> `ha-addons-nanobot-{amd64,aarch64}` packages are already public.
 
 Fresh-instance install: add `https://github.com/niradler/ha-addons` as a
 repository → install **Nanobot** (pulls the image) → set `llm_api_key` → start.
