@@ -1,5 +1,5 @@
 name: Nanobot
-version: "0.1.0"
+version: "0.1.1"
 slug: nanobot
 # Prebuilt image pulled from GHCR (built locally per arch, tag = version).
 # Remove this line to build on-device from the Dockerfile instead.
@@ -36,21 +36,19 @@ map:
 # or hassio_api, so the add-on's supervisor token cannot touch HA. HA control
 # works only with a user-supplied long-lived token (ha_token), used read-only by
 # default. No privileged, no SYS_ADMIN.
+# Add-on-only options. nanobot's own config (providers, MCP servers, tools,
+# channels, …) is managed in the nanobot WebUI or by editing config.json — see
+# DOCS. Secrets here are injected as ${VAR} env for config.json to reference.
 options:
   log_level: info
   llm_provider: openai
   llm_model: gpt-4.1
   llm_api_key: ""
   ha_token: ""
-  ha_url: ""
-  ha_mcp_mode: "off"
-  ha_read_only: true
   api_enabled: false
   api_publish_port: false
   api_port: 8900
   api_token: ""
-  exec_enabled: false
-  restrict_to_workspace: true
   webui_auth: false
   secrets: []
 schema:
@@ -59,15 +57,10 @@ schema:
   llm_model: str?
   llm_api_key: password?
   ha_token: password?
-  ha_url: str?
-  ha_mcp_mode: list(off|builtin|ha-mcp|both)
-  ha_read_only: bool
   api_enabled: bool
   api_publish_port: bool
   api_port: int(1024,65535)
   api_token: password?
-  exec_enabled: bool
-  restrict_to_workspace: bool
   webui_auth: bool
   secrets:
     - password

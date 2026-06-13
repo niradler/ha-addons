@@ -7,37 +7,23 @@ configuration:
   llm_provider:
     name: LLM provider
     description: >-
-      nanobot provider name used to seed config.json on first run (e.g.
-      openrouter, anthropic, openai, groq). Edit config.json for full control.
+      Provider used to seed nanobot's config on first run (e.g. openai,
+      openrouter, anthropic, groq). Change providers later in the nanobot WebUI.
   llm_model:
     name: LLM model
     description: >-
-      Model id to seed (e.g. anthropic/claude-sonnet-4.5). Leave empty for
-      nanobot's default.
+      Model id to seed (e.g. gpt-4.1, anthropic/claude-sonnet-4.5). Leave empty
+      for nanobot's default.
   llm_api_key:
     name: LLM API key
     description: >-
-      API key for the chosen provider. Injected as the ${LLM_API_KEY} env var
-      and referenced from config.json — never written to disk in plaintext.
+      API key for the chosen provider. Injected as ${LLM_API_KEY} and referenced
+      from config.json — never written to disk in plaintext.
   ha_token:
     name: Home Assistant token
     description: >-
-      Long-lived access token for HA control via the built-in MCP Server.
-      Injected as ${HA_TOKEN}. Required for ha_mcp_mode builtin/both/ha-mcp.
-  ha_url:
-    name: Home Assistant URL
-    description: >-
-      Base URL nanobot uses to reach HA core (advanced). Leave empty to use the
-      internal supervisor proxy.
-  ha_mcp_mode:
-    name: HA control mode
-    description: >-
-      off = no HA control; builtin = HA Model Context Protocol Server (SSE);
-      ha-mcp = bundled stdio MCP server; both = both. Start with off, then
-      enable once a token is set.
-  ha_read_only:
-    name: HA read-only
-    description: Restrict HA control to read-only operations where supported.
+      Long-lived HA token, injected as ${HA_TOKEN}. Reference it from an HA MCP
+      server you add in the nanobot WebUI / config.json (see Documentation).
   api_enabled:
     name: Enable OpenAI API
     description: Run nanobot's OpenAI-compatible API (/v1/chat/completions).
@@ -52,14 +38,6 @@ configuration:
   api_token:
     name: API bearer token
     description: Required bearer token when the API is published on a host port.
-  exec_enabled:
-    name: Enable shell exec tool
-    description: >-
-      Allow the agent to run shell commands. Off by default. Runs UNSANDBOXED
-      (the add-on is not granted SYS_ADMIN for bubblewrap).
-  restrict_to_workspace:
-    name: Restrict tools to workspace
-    description: Keep file/shell tools confined to the workspace directory.
   webui_auth:
     name: Require WebUI password
     description: >-

@@ -102,12 +102,12 @@ nanobot's own secret prompt as defense-in-depth.
   `api_token`, and `secrets[]`) are injected as environment variables and
   referenced from config as `${VAR}` (e.g. `${HA_TOKEN}`). nanobot resolves them
   in memory at startup and fails fast if a referenced var is unset.
-- **Read-only HA, enforced by allow-list.** With `ha_read_only: true` (default),
-  the built-in HA MCP registers **only** the read tool `GetLiveContext`. Control
-  intents (`HassTurnOn`, `HassTurnOff`, `HassLightSet`, …) are never exposed, so
-  the agent physically cannot actuate devices. An allow-list can only
-  *under*-grant. HA control is also **off** entirely by default
-  (`ha_mcp_mode: off`).
+- **HA control is opt-in and read-only by allow-list.** The add-on does not wire
+  HA control; you add an HA MCP server in the nanobot WebUI / `config.json` (see
+  DOCS). Using `"enabledTools": ["GetLiveContext"]` registers **only** the read
+  tool — control intents (`HassTurnOn`, `HassTurnOff`, …) are never exposed, so
+  the agent physically cannot actuate devices (an allow-list can only
+  *under*-grant). The `ha_token` you provide is the only HA credential.
 - **No ambient HA credentials.** The add-on does **not** request the
   `homeassistant_api` or `hassio_api` grants, so its supervisor token cannot
   touch HA. The only HA credential is the read-only `ha_token` you choose to

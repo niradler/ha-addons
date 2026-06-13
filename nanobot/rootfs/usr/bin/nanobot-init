@@ -18,7 +18,6 @@ write_env() {
 }
 
 write_env HA_TOKEN "$(bashio::config 'ha_token')"
-write_env HA_URL "$(bashio::config 'ha_url')"
 write_env LLM_API_KEY "$(bashio::config 'llm_api_key')"
 write_env API_TOKEN "$(bashio::config 'api_token')"
 
