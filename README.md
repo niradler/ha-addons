@@ -3,13 +3,21 @@
 A Home Assistant **add-on repository** (monorepo). Add it once, then install any
 add-on inside it from the HA Add-on store.
 
-## Add this repository
+## Install
 
-Settings → Add-ons → Add-on store → ⋮ → **Repositories**, then add:
+1. In Home Assistant: **Settings → Add-ons → Add-on store → ⋮ (top right) →
+   Repositories**, and add:
 
-```text
-https://github.com/niradler/ha-addons
-```
+   ```text
+   https://github.com/niradler/ha-addons
+   ```
+
+2. The store now lists the add-ons below. Open **Nanobot** → **Install**. It
+   **pulls** a prebuilt image (no on-device build, ~1–2 min).
+3. Open the add-on's **Configuration** tab, set `llm_api_key` (your
+   OpenAI/OpenRouter/etc. key), then **Start**.
+4. Open the WebUI from the sidebar (it's behind your HA login — no extra
+   password). See [`nanobot/DOCS.md`](nanobot/DOCS.md) for full configuration.
 
 ## Add-ons in this repository
 
